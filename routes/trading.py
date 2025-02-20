@@ -170,9 +170,8 @@ def get_current_price(group_id, stock_symbol, freq):
     if not group_state:
         return jsonify({"error": "Group not found"}), 404
 
-    if group_state != "STARTED":
-        return jsonify({"error": "Session is not active"}), 400
-
+    if group_state == "CREATED":
+        return jsonify({"error": "Session is not started"}), 400
 
     price = db.get_stock_price_series(group_id, stock_symbol, freq)
     ohlc_json = price.reset_index()
