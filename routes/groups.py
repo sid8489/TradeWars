@@ -76,6 +76,9 @@ def join_group():
     if group_id not in groups:
         return jsonify({"error": "Group not found"}), 404
 
+    if group_id in groups.get(group_id).user_data.keys():
+        return jsonify({"error": "User already joined"}), 200
+
     groups.get(group_id).user_data[user_id] = UserDataPerSession(groups.get(group_id).per_user_coins)
     return jsonify({"message": "Joined group successfully"}), 200
 
