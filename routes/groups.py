@@ -99,7 +99,7 @@ def get_groups(user_id):
     user_groups = []
     for group_id, group_data in groups.items():
         if user_id in group_data.user_data:
-            user_groups.append(group_data.group_id)
+            user_groups.append(group_data)
     return jsonify(user_groups), 200
 
 @bp.route('/getGroupDetails/<group_id>', methods=['GET'])
