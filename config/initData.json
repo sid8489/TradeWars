@@ -1,0 +1,58 @@
+{
+    "users":
+    [
+        {
+            "id": "UI1",
+            "name": "Mani",
+            "password": "9971146275",
+            "phone": "9971146275"
+        },
+        {
+            "id": "UI2",
+            "name": "Shubham",
+            "password": "9454046324",
+            "phone": "9454046324"
+        },
+        {
+            "id": "UI3",
+            "name": "Siddharth",
+            "password": "8909805858",
+            "phone": "8909805858"
+        }
+    ],
+    "groups":
+    [
+        {
+            "id": "G1",
+            "name": "Group 1",
+            "creator_id": "UI1",
+            "duration": 300,
+            "per_user_coins": 1000000,
+            "stock_list":
+            [
+                "NIFTY",
+                "SENSEX"
+            ],
+            "joinies":
+            [
+                "UI3"
+            ]
+        },
+        {
+            "id": "G2",
+            "name": "Group 2",
+            "creator_id": "UI2",
+            "duration": 600,
+            "per_user_coins": 1000000,
+            "stock_list":
+            [
+                "BANKNIFTY",
+                "FINNIFTY"
+            ],
+            "joinies":
+            [
+                "UI3"
+            ]
+        }
+    ]
+}
