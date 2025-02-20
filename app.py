@@ -33,8 +33,8 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO,
                         format="%(processName)s  %(asctime)s - %(name)s - %(levelname)s - %(message)s",
                         datefmt='%d-%b-%y %H:%M:%S')
-    db.init(json.loads(open("config/initData.json", "r").read()))
+    db.init(json.loads(open("./config/initData.json", "r").read()))
     socketio.on_event("join_group", on_join)
     socketio.on_event("leave_group", on_leave)
     logging.info(socketio.server.eio.handlers)
-    socketio.run(app, debug=True, allow_unsafe_werkzeug=True)
+    socketio.run(app, allow_unsafe_werkzeug=True)
