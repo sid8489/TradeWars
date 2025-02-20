@@ -151,3 +151,20 @@ def get_all_groups():
    for group_id, group_data in groups.items():
         data.append(group_data.to_dict())
    return jsonify(data), 200
+
+@bp.route('/getAllJoinableGroupsForUser/<user_id>', methods=['GET'])
+@swag_from({
+    'parameters': [
+        {'name': 'user_id', 'in': 'path', 'type': 'string', 'required': True, 'description': 'User ID'}
+    ],
+    'responses': {
+        200: {'description': 'List of joinable groups for given user'},
+        404: {'description': 'User not found'}
+    }
+})
+def get_all_joinable_groups_for_user(user_id):
+   data = []
+   for group_id, group_data in groups.items():
+       if user_id not in group_data.user_data.keys():
+           data.append(group_data.to_dict())
+   return jsonify(data), 200
