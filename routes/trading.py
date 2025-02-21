@@ -52,6 +52,8 @@ def market_feed_loop(group_id, duration):
                 logging.info(f"Market Data: {market_data}", )
                 for _, details in rooms.items():
                     market_updates = {}
+                    if not db_instance.check_user(group_id, details["user_id"]):
+                        continue
                     pnl = db.get_pnl(group_id, details["user_id"])
                     for stock, v in market_data.items():
                         market_updates[stock] = {
@@ -61,6 +63,8 @@ def market_feed_loop(group_id, duration):
                     socketio.emit('market_update', market_updates, room=details["room_id"])
                 market_update_details = {}
                 for _, room_details in details_rooms.items():
+                    if not db_instance.check_user(group_id, room_details["user_id"]):
+                        continue
                     pnl = db.get_pnl(group_id, room_details["user_id"])
                     for stock, v in market_data.items():
                         market_update_details[stock] = {

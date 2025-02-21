@@ -178,6 +178,10 @@ class InMemoryDB:
         with self.lock:
             self._groups[group_id].user_data[user_id] = UserDataPerSession(self._groups[group_id].per_user_coins)
 
+    def check_user(self, group_id: str, user_id: str):
+        with self.lock:
+            return user_id in self._groups[group_id].user_data
+
 db_instance = InMemoryDB()
 users = db_instance._users
 groups = db_instance._groups
