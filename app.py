@@ -1,5 +1,6 @@
 import json
 import logging
+import threading
 
 import flask
 from flask_socketio import join_room, leave_room
@@ -13,7 +14,10 @@ logging.basicConfig(level=logging.INFO,
 
 # Initialize DB at import time
 with open("./config/initData.json", "r") as f:
-    db.init(json.load(f))
+    x = json.load(f)
+    for g in x["groups"]:
+        trading.lock[g["id"]] = threading.RLock()
+    db.init(x)
 
 # Register blueprints
 app.register_blueprint(auth.bp)

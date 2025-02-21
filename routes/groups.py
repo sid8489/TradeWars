@@ -1,8 +1,12 @@
+import threading
+
 from flask import Blueprint, request, jsonify
 import uuid
 from db import users, groups, db_instance
 from models import UserDataPerSession
 from flasgger import swag_from
+
+from routes import trading
 
 bp = Blueprint('groups', __name__, url_prefix='/')
 
@@ -43,6 +47,7 @@ def create_group():
     group_id = f"GI{int(uuid.uuid4().hex[:12], 16) % 10**10}"
     db_instance.add_group(group_id, name, creator_id, stock_list, per_user_coins, duration)
     groups.get(group_id).user_data[creator_id] = UserDataPerSession(per_user_coins)
+    trading.lock[group_id] = threading.RLock()
     return jsonify({"group_id": group_id}), 201
 
 @bp.route('/joinGroup', methods=['POST'])
