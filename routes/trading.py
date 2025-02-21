@@ -72,7 +72,7 @@ def market_feed_loop(group_id, duration):
                 leaderboard_details = db.get_leaderboard(group_id)
                 socketio.emit('leaderboard_details', leaderboard_details, room=group_id+"leaderboard")
             except Exception as e:
-                logging.error("Exception while market update", exc_info=e)
+                logging.error(f"Exception while market update: {group_id}", exc_info=e)
             socketio.sleep(1)  # Use socketio.sleep to avoid blocking
     finally:
         db.end_session(group_id)
