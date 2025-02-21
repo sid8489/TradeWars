@@ -94,10 +94,10 @@ class InMemoryDB:
 
     def get_leaderboard(self, group_id: str):
         with self.lock:
-            leaderboard = {}
-            for user_id in groups[group_id].user_data:
-                leaderboard[user_id] = groups[group_id].user_data.get(user_id, {}).mtm
-            sorted_leaderboard = dict(sorted(leaderboard.items(), key=lambda item: item[1], reverse=True))
+            leaderboard = []
+            for user_id, user_data in groups[group_id].user_data.items():
+                leaderboard.append({"user_id": user_id, "user_name": users[user_id].name , "mtm": user_data.mtm})
+            sorted_leaderboard = sorted(leaderboard, key=lambda item: item["mtm"], reverse=True)
             return sorted_leaderboard
 
     def get_user_available_coins(self, group_id: str, user_id: str):
