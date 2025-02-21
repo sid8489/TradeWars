@@ -1,6 +1,7 @@
 import json
 import logging
 
+import flask
 from flask_socketio import join_room, leave_room
 import db
 from extension import app, socketio  # Import from extensions
@@ -20,12 +21,31 @@ app.register_blueprint(groups.bp)
 app.register_blueprint(trading.bp)
 
 
+
+def get_all_client_sessions():
+    """Returns a list of all active client session IDs."""
+    return list(socketio.server.manager.rooms.get('/', {}).keys())
+
 def on_join(data):
     group_id = data['group_id']
     logging.info("Client asked to join group %s", group_id)
     join_room(group_id)
     socketio.emit('my_response', {'message': 'Successfully joined room ' + group_id})
 
+def on_join_group_details(data):
+    group_id = data['group_id']
+    freq = data['freq']
+    session_id = flask.request.sid
+    trading.details_rooms[session_id] = {'freq': freq, 'room_id': group_id+"details"+freq}
+    logging.info("Client asked to join group details %s", group_id)
+    join_room(group_id+"details"+freq)
+    socketio.emit('my_response', {'message': 'Successfully joined room ' + group_id})
+
+def on_join_group_leaderboard(data):
+    group_id = data['group_id']
+    logging.info("Client asked to join group Leaderboard %s", group_id)
+    join_room(group_id+"leaderboard")
+    socketio.emit('my_response', {'message': 'Successfully joined room ' + group_id})
 
 def on_leave(data):
     group_id = data['group_id']
@@ -36,6 +56,8 @@ def on_leave(data):
 
 # Attach event handlers
 socketio.on_event("join_group", on_join)
+socketio.on_event("join_group_details", on_join_group_details)
+socketio.on_event("join_group_leaderboard", on_join_group_leaderboard)
 socketio.on_event("leave_group", on_leave)
 
 

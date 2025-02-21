@@ -3,12 +3,13 @@ import threading
 
 from flasgger import Swagger, swag_from
 from flask import Blueprint, request, jsonify, Flask
-from extension import app, socketio  # Import from extensions
+from extension import socketio  # Import from extensions
 from db import db_instance
 
 
 bp = Blueprint('trading', __name__, url_prefix='')
 db = db_instance
+details_rooms = {}
 
 @bp.route('/begin_session/<group_id>', methods=['POST'])
 @swag_from({
@@ -48,7 +49,17 @@ def market_feed_loop(group_id, duration):
             try:
                 market_data = db.simulate(group_id)
                 logging.info(f"Market Data: {market_data}", )
-                socketio.emit('market_update', market_data, room=group_id)  # Use socketio.emit
+                socketio.emit('market_update', market_data, room=group_id)
+                market_update_details = {}
+                for _, room_details in details_rooms.items():
+                    for stock, v in market_data.items():
+                        market_update_details[stock] = {
+                            "ltp": v,
+                            "candles": db.get_stock_price_series(group_id, stock, room_details["freq"]),
+                        }
+                    socketio.emit('market_update_details', market_update_details, room=room_details["room_id"])
+                leaderboard_details = db.get_leaderboard(group_id)
+                socketio.emit('leaderboard_details', leaderboard_details, room=group_id+"leaderboard")
             except Exception as e:
                 logging.error("Exception while market update", exc_info=e)
             socketio.sleep(1)  # Use socketio.sleep to avoid blocking
@@ -174,8 +185,5 @@ def get_current_price(group_id, stock_symbol, freq):
         return jsonify({"error": "Session is not started"}), 400
 
     price = db.get_stock_price_series(group_id, stock_symbol, freq)
-    ohlc_json = price.reset_index()
-    ohlc_json["timestamp"] = ohlc_json["index"].astype("int64") // 1_000_000_000
-    ohlc_json = ohlc_json.drop(columns=["index"])
-    return jsonify({"price": ohlc_json.to_dict(orient="records")}), 200
+    return jsonify({"price": price}), 200
 

@@ -64,9 +64,13 @@ class InMemoryDB:
                 return None
             return self._groups[group_id].stocks[stock_id].prices_per_second[self._groups[group_id].active_duration]
 
-    def get_stock_price_series(self, group_id: str, stock_id: str, freq: str) -> float:
+    def get_stock_price_series(self, group_id: str, stock_id: str, freq: str) -> Dict:
         with self.lock:
-            return self._groups[group_id].to_ohlc_candles(stock_id, freq)
+            price = self._groups[group_id].to_ohlc_candles(stock_id, freq)
+            ohlc_json = price.reset_index()
+            ohlc_json["timestamp"] = ohlc_json["index"].astype("int64") // 1_000_000_000
+            ohlc_json = ohlc_json.drop(columns=["index"])
+            return ohlc_json.to_dict(orient="records")
 
     def get_stocks(self, group_id: str) -> List[str]:
         with self.lock:
@@ -86,6 +90,14 @@ class InMemoryDB:
                 "open_positions": user.open_positions,
                 "closed_positions": user.roundtrips,
             }
+
+    def get_leaderboard(self, group_id: str):
+        with self.lock:
+            leaderboard = {}
+            for user_id in groups[group_id].user_data:
+                leaderboard[user_id] = groups[group_id].user_data.get(user_id, {}).mtm
+            sorted_leaderboard = dict(sorted(leaderboard.items(), key=lambda item: item[1], reverse=True))
+            return sorted_leaderboard
 
     def get_user_available_coins(self, group_id: str, user_id: str):
         with self.lock:
