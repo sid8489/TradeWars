@@ -79,7 +79,7 @@ def join_group():
     if group_id in groups.get(group_id).user_data.keys():
         return jsonify({"error": "User already joined"}), 200
 
-    groups.get(group_id).user_data[user_id] = UserDataPerSession(groups.get(group_id).per_user_coins)
+    db_instance.join_group(group_id, user_id)
     return jsonify({"message": "Joined group successfully"}), 200
 
 @bp.route('/getGroups/<user_id>', methods=['GET'])

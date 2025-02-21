@@ -174,6 +174,10 @@ class InMemoryDB:
             data["available_coins"] = self._groups[group_id].user_data[user_id].available_coins
             return data
 
+    def join_group(self, group_id: str, user_id: str):
+        with self.lock:
+            self._groups[group_id].user_data[user_id] = UserDataPerSession(self._groups[group_id].per_user_coins)
+
 db_instance = InMemoryDB()
 users = db_instance._users
 groups = db_instance._groups
