@@ -24,7 +24,7 @@
     [
         {
             "id": "G1",
-            "name": "DEMO FINAL",
+            "name": "HACKATHON",
             "creator_id": "UI1",
             "duration": 300,
             "per_user_coins": 1000000,
@@ -40,7 +40,7 @@
         },
         {
             "id": "G2",
-            "name": "DEMO FINAL FINAL",
+            "name": "SHARE MARKET",
             "creator_id": "UI2",
             "duration": 600,
             "per_user_coins": 1000000,
