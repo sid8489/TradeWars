@@ -131,7 +131,13 @@ def get_leaderboard(group_id):
     if group_id not in groups:
         return jsonify({"error": "Group not found"}), 404
 
-    return jsonify(db_instance.get_leaderboard(group_id)), 200
+    leaderboard = []
+    for user_id, user_data in groups[group_id].user_data.items():
+        leaderboard.append({"user_id": user_id, "user_name": users[user_id].name , "mtm": user_data.mtm})
+
+    sorted_leaderboard = sorted(leaderboard, key=lambda item: item["mtm"], reverse=True)
+
+    return jsonify(sorted_leaderboard), 200
 
 @bp.route('/getAllGroups', methods=['GET'])
 @swag_from({
