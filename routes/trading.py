@@ -9,6 +9,7 @@ from db import db_instance
 
 bp = Blueprint('trading', __name__, url_prefix='')
 db = db_instance
+lock = {}
 rooms = {}
 details_rooms = {}
 
@@ -41,42 +42,45 @@ def begin_session(group_id):
 
     thread = threading.Thread(target=market_feed_loop, args=(group_id, db.get_group_duration(group_id)))
     db.being_session(group_id)
+    lock[group_id] = threading.RLock()
     thread.start()
     return jsonify({"message": "Session started"}), 200
 
 def market_feed_loop(group_id, duration):
     try:
         for _ in range(duration):
-            try:
-                market_data = db.simulate(group_id)
-                logging.info(f"Market Data: {market_data}", )
-                for _, details in rooms.items():
-                    market_updates = {}
-                    if not db_instance.check_user(group_id, details["user_id"]):
-                        continue
-                    pnl = db.get_pnl(group_id, details["user_id"])
-                    for stock, v in market_data.items():
-                        market_updates[stock] = {
-                            "ltp": v,
-                            "pnl": pnl[stock]
-                        }
-                    socketio.emit('market_update', market_updates, room=details["room_id"])
-                market_update_details = {}
-                for _, room_details in details_rooms.items():
-                    if not db_instance.check_user(group_id, room_details["user_id"]):
-                        continue
-                    pnl = db.get_pnl(group_id, room_details["user_id"])
-                    for stock, v in market_data.items():
-                        market_update_details[stock] = {
-                            "ltp": v,
-                            "candles": db.get_stock_price_series(group_id, stock, room_details["freq"]),
-                            "pnl": pnl[stock]
-                        }
-                    socketio.emit('market_update_details', market_update_details, room=room_details["room_id"])
-                leaderboard_details = db.get_leaderboard(group_id)
-                socketio.emit('leaderboard_details', leaderboard_details, room=group_id+"leaderboard")
-            except Exception as e:
-                logging.error(f"Exception while market update: {group_id}", exc_info=e)
+            with lock[group_id]:
+                try:
+                    market_data = db.simulate(group_id)
+                    logging.info(f"Market Data: {market_data}", )
+                    for _, details in rooms.items():
+                        market_updates = {}
+                        if not db_instance.check_user(group_id, details["user_id"]):
+                            continue
+                        pnl = db.get_pnl(group_id, details["user_id"])
+                        for stock, v in market_data.items():
+                            market_updates[stock] = {
+                                "ltp": v,
+                                "pnl": pnl[stock]
+                            }
+                        socketio.emit('market_update', market_updates, room=details["room_id"])
+                    market_update_details = {}
+                    for _, room_details in details_rooms.items():
+                        if not db_instance.check_user(group_id, room_details["user_id"]):
+                            continue
+                        pnl = db.get_pnl(group_id, room_details["user_id"])
+                        for stock, v in market_data.items():
+                            market_update_details[stock] = {
+                                "ltp": v,
+                                "candles": db.get_stock_price_series(group_id, stock, room_details["freq"]),
+                                "pnl": pnl[stock]
+                            }
+                        socketio.emit('market_update_details', market_update_details, room=room_details["room_id"])
+                    leaderboard_details = db.get_leaderboard(group_id)
+                    socketio.emit('leaderboard_details', leaderboard_details, room=group_id+"leaderboard")
+                except Exception as e:
+                    logging.error(f"GroupId, {group_id}")
+                    logging.error(f"Exception while market update: {group_id}", exc_info=e)
             socketio.sleep(1)  # Use socketio.sleep to avoid blocking
     finally:
         db.end_session(group_id)
