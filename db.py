@@ -121,7 +121,7 @@ class InMemoryDB:
                 existing_position.quantity += trade.quantity
                 existing_position.entry_price = ((existing_position.entry_price * existing_position.quantity) + (trade.price * trade.quantity)) / (existing_position.quantity + trade.quantity)
             else:
-                position = OpenPosition(user_id, trade.stock, trade.quantity, trade.price, trade.timestamp, "LONG")
+                position = OpenPosition(user_id, trade.stock, trade.quantity, trade.price, trade.timestamp, "BUY")
                 user_data.open_positions.append(position)
         elif trade.direction == "SELL":
             for position in user_data.open_positions:
