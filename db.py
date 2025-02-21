@@ -186,4 +186,4 @@ def init(data):
         db_instance.add_group(group["id"], group["name"], group["creator_id"], group["stock_list"], group["per_user_coins"], group["duration"])
         groups.get(group["id"]).user_data[group["creator_id"]] = UserDataPerSession(group["per_user_coins"])
         for user_id in group["joinies"]:
-            groups.get(group["id"]).user_data[user_id] = UserDataPerSession(groups.get(group["per_user_coins"]))
+            groups.get(group["id"]).user_data[user_id] = UserDataPerSession(group["per_user_coins"])
