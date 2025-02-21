@@ -168,6 +168,8 @@ def get_all_joinable_groups_for_user(user_id):
    data = []
    for group_id, group_data in groups.items():
        if user_id not in group_data.user_data.keys():
+           if group_data.state == 'FINISHED':
+               continue
            data.append(group_data.to_dict())
    return jsonify(data), 200
 
