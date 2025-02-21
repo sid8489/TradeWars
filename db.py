@@ -54,6 +54,7 @@ class InMemoryDB:
             prices = {}
             for stock in self._groups[group_id].stocks.values():
                 prices[stock.id] = stock.prices_per_second[self._groups[group_id].active_duration]
+
             self._groups[group_id].active_duration += 1
             self._update_pnl(self._groups[group_id])
             return prices
@@ -148,6 +149,30 @@ class InMemoryDB:
                 op.current_price = group.stocks[op.stock].prices_per_second[group.active_duration]
                 op.update_pnl()
             user.update_mtm()
+
+    def get_pnl(self, group_id: str, user_id: str):
+        with self.lock:
+            data = {  }
+            for stock in self._groups[group_id].stocks.keys():
+                data[stock] = {
+                    "holdings": 0,
+                    "unrealized_pnl": 0,
+                    "realized_pnl": 0,
+                }
+            user = self._groups[group_id].user_data[user_id]
+            for op in user.open_positions:
+                data[op.stock]["holdings"] = op.quantity
+                data[op.stock]["unrealized_pnl"] = op.pnl
+                data[op.stock]["op"] = op.to_dict()
+            for rt in user.roundtrips:
+                data[rt.stock]["realized_pnl"] += rt.pnl
+            return data
+
+    def get_margin(self, group_id: str, user_id: str):
+        with self.lock:
+            data = {  }
+            data["available_coins"] = self._groups[group_id].user_data[user_id].available_coins
+            return data
 
 db_instance = InMemoryDB()
 users = db_instance._users

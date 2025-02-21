@@ -170,3 +170,22 @@ def get_all_joinable_groups_for_user(user_id):
        if user_id not in group_data.user_data.keys():
            data.append(group_data.to_dict())
    return jsonify(data), 200
+
+
+@bp.route('/getMargin/<group_id>/<user_id>', methods=['GET'])
+@swag_from({
+    'parameters': [
+        {'name': 'group_id', 'in': 'path', 'type': 'string', 'required': True, 'description': 'Group ID'},
+        {'name': 'user_id', 'in': 'path', 'type': 'string', 'required': True, 'description': 'User ID'}
+    ],
+    'responses': {
+        200: {'description': 'Available Margin'},
+        404: {'description': 'User not found'}
+    }
+})
+def get_margin(group_id, user_id):
+    if group_id not in groups:
+        return jsonify({"error": "Group not found"}), 404
+    if user_id not in users:
+        return jsonify({"error": "User not found"}), 404
+    return jsonify(db_instance.get_margin(group_id, user_id)), 200

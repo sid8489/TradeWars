@@ -28,17 +28,21 @@ def get_all_client_sessions():
 
 def on_join(data):
     group_id = data['group_id']
+    user_id = data['user_id']
+    session_id = flask.request.sid
+    trading.rooms[session_id] = {'room_id': group_id+user_id, "user_id": user_id}
     logging.info("Client asked to join group %s", group_id)
-    join_room(group_id)
+    join_room(group_id+user_id)
     socketio.emit('my_response', {'message': 'Successfully joined room ' + group_id})
 
 def on_join_group_details(data):
     group_id = data['group_id']
     freq = data['freq']
+    user_id = data['user_id']
     session_id = flask.request.sid
-    trading.details_rooms[session_id] = {'freq': freq, 'room_id': group_id+"details"+freq}
+    trading.details_rooms[session_id] = {'freq': freq, 'room_id': group_id+"details"+freq+user_id, "user_id": user_id}
     logging.info("Client asked to join group details %s", group_id)
-    join_room(group_id+"details"+freq)
+    join_room(group_id+"details"+freq+user_id)
     socketio.emit('my_response', {'message': 'Successfully joined room ' + group_id})
 
 def on_join_group_leaderboard(data):

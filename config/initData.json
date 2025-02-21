@@ -24,7 +24,7 @@
     [
         {
             "id": "G1",
-            "name": "Group 1",
+            "name": "DEMO FINAL",
             "creator_id": "UI1",
             "duration": 300,
             "per_user_coins": 1000000,
@@ -40,7 +40,7 @@
         },
         {
             "id": "G2",
-            "name": "Group 2",
+            "name": "DEMO FINAL FINAL",
             "creator_id": "UI2",
             "duration": 600,
             "per_user_coins": 1000000,
